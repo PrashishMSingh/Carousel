@@ -79,7 +79,7 @@ function Slider(carousel, wrapper, sliderImages){
             }else{
               clearInterval(sliderAnim)
             }
-          }, -1000)
+          }, 5)
           this.currentIndex = sliderImages.length
 
       }
@@ -93,7 +93,7 @@ function Slider(carousel, wrapper, sliderImages){
             clearInterval(sliderAnim)
           }
           this.currentIndex = currentPosition/parseInt(IMAGEWIDTH);
-        }, -1000)
+        }, 5)
 
       }
       // index update
@@ -119,7 +119,7 @@ function Slider(carousel, wrapper, sliderImages){
             }else{
               clearInterval(sliderAnim)
             }
-          }, -1000)
+          }, 5)
       }else{
         this.currentIndex++;
         var sliderAnim = setInterval(function(){
@@ -133,7 +133,7 @@ function Slider(carousel, wrapper, sliderImages){
 
             clearInterval(sliderAnim)
           }
-        }, -1000)
+        }, 5)
       }
 
 
