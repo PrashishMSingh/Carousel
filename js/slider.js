@@ -1,6 +1,6 @@
 const IMAGEWIDTH = '700';
 const IMAGEHEIGHT = '430';
-const CHANGESPEED = 10;
+const CHANGESPEED = 5;
 
 
 function Carousel(WIDTH, HEIGHT, carouselElement){
@@ -46,7 +46,6 @@ function Wrapper(wrapperElement, sliderImages){
   }
 
   this.setLeftPosition = function(leftPosition){
-    console.log(leftPosition)
     this.wrapper.style.left = leftPosition + 'px';
     this.leftPosition = leftPosition;
   }
@@ -148,9 +147,10 @@ function Indicator(parentElement, indicatorCount){
 // side slider button
 function SideButton(parentElement){
   this.parentElement = parentElement;
+  this.isEnabled = true;
 
   this.init = function(){
-    this.sideBtnElement = document.createElement('div')
+    this.sideBtnElement = document.createElement('button')
     this.slideIcon = document.createElement('i');
 
     this.sideBtnElement.style.position = 'absolute';
@@ -168,6 +168,21 @@ function SideButton(parentElement){
 
     return this;
   }
+
+  this.disableBtn = function(){
+    if(this.isEnabled){
+      this.sideBtnElement.disabled = true;
+      this.isEnabled = false;
+    }
+  }
+
+  this.enableBtn = function(){
+    if(!this.isEnabled){
+      this.sideBtnElement.disabled = false;
+      this.isEnabled = true;
+    }
+  }
+
 
   this.getElement = function(){
     return this.sideBtnElement
@@ -204,31 +219,41 @@ leftSideBtn.setIconPos('left')
 rightSideBtn.setIconPos('right')
 indicator.initializeIndicators();
 
-//
-//
-//
-//
-//
-//
-//
-
-
-
-
-indicator.getElement().onclick = function(e){
-  // this.wrapper.style.left = (-this.currentIndex * parseInt(IMAGEWIDTH)) + 'px'
-  // var itemIndex = .indexOf(e.target)
-  // console.log(Array.from(indicator.getElement().children).indexOf(e.target))
-
-  indicator.setCurrentIndex(Array.from(indicator.getElement().children).indexOf(e.target));
-  wrapper.setLeftPosition(-(indicator.getCurrentIndex() * IMAGEWIDTH))
+function disableBtn(){
+  leftSideBtn.getElement().disable
+  rightSideBtn.getElement().disable
 }
 
+indicator.getElement().onclick = function(e){
+  var wrapperPosition = wrapper.getLeftPosition()
+  var newIndex = Array.from(indicator.getElement().children).indexOf(e.target);
+  var destinationPosition = -(newIndex * IMAGEWIDTH)
+  indicator.setCurrentIndex(newIndex);
+
+  var anim = setInterval(function(){
+      if(wrapperPosition != destinationPosition){
+        leftSideBtn.disableBtn()
+        rightSideBtn.disableBtn()
+        if(wrapperPosition < destinationPosition){
+            wrapperPosition = wrapperPosition + CHANGESPEED
+          }
+        else{
+          wrapperPosition = wrapperPosition - CHANGESPEED
+        }
+        wrapper.setLeftPosition(wrapperPosition)
+      }else{
+        leftSideBtn.enableBtn()
+        rightSideBtn.enableBtn()
+        clearInterval(anim)
+      }
+  }, CHANGESPEED)
+}
 
 // Left button listener
 leftSideBtn.getElement().onclick = function(){
-
   indicator.decrementIndex()
+  leftSideBtn.disableBtn()
+  rightSideBtn.disableBtn()
 
   var currentIndex = indicator.getCurrentIndex();
   var currentPosition = wrapper.getLeftPosition();
@@ -242,277 +267,65 @@ leftSideBtn.getElement().onclick = function(){
         if(currentPosition !== updatePosition){
           currentPosition = currentPosition - CHANGESPEED
 
-          console.log("current ", currentPosition , " updated : ", updatePosition , "current index : ", indicator.getCurrentIndex())
           wrapper.setLeftPosition(currentPosition)
         }else{
+          leftSideBtn.enableBtn()
+          rightSideBtn.enableBtn()
           clearInterval(sliderAnim)
         }
       }, 5)
   }else{
-    // this.currentIndex++;
-    // indicator.incrementIndex()
-    // console.log('ind : ', indicator.getCurrentIndex())
     var sliderAnim = setInterval(function(){
       if(currentPosition !== updatePosition){
         currentPosition = currentPosition + CHANGESPEED
-        // this.wrapper.style.left = currentPosition + 'px'
         wrapper.setLeftPosition(currentPosition)
-        console.log("update Index aaaaaa : ", updatePosition, "current insdex : ", currentPosition, " : ", indicator.getCurrentIndex() )
 
       }else{
         indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH)
+        leftSideBtn.enableBtn()
+        rightSideBtn.enableBtn()
         clearInterval(sliderAnim)
       }
     }, 5)
   }
 }
 
-
 // Right Index
 rightSideBtn.getElement().onclick = function(){
   indicator.incrementIndex()
+  leftSideBtn.disableBtn()
+  rightSideBtn.disableBtn()
+
   var currentPosition = wrapper.getLeftPosition();
-
   var updatePosition = -(indicator.getCurrentIndex() * IMAGEWIDTH)
-
-  // console.log("current index : ", indicator.getCurrentIndex() , "images length : ", sliderImages.length)
 
   if(indicator.getCurrentIndex() >= sliderImages.length){
       updatePosition = 0
       indicator.setCurrentIndex(0);
 
       var sliderAnim = setInterval(function(){
-
         if(currentPosition !== updatePosition){
           currentPosition = currentPosition + CHANGESPEED
-
-          // this.wrapper.style.left = currentPosition + 'px'
           wrapper.setLeftPosition(currentPosition)
         }else{
+          leftSideBtn.enableBtn()
+          rightSideBtn.enableBtn()
           clearInterval(sliderAnim)
         }
       }, 5)
   }
 
-
   else{
-    // index na mile
-    // console.log(indicator.getCurrentIndex())
     var sliderAnim = setInterval(function(){
       if(currentPosition !== updatePosition){
         currentPosition = currentPosition - CHANGESPEED
-
-        // this.wrapper.style.left = currentPosition + 'px'
         wrapper.setLeftPosition(currentPosition )
-        console.log("current Position : ", currentPosition , "update postition : ", updatePosition)
       }else{
-        indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH) ;
+        indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH);
+        leftSideBtn.enableBtn()
+        rightSideBtn.enableBtn()
         clearInterval(sliderAnim)
       }
     }, 5)
   }
 }
-
-
-
-// function Slider(carousel, wrapper, sliderImages){
-//   this.carousel = carousel;
-//   this.wrapper = wrapper;
-//   this.sliderImages = sliderImages;
-//   this.currentIndex = 1;
-//
-//   this.updateIndex = function(){
-//     var indicatorList = this.indexIndicator.children
-//
-//
-//     for(var i = 0; i<indicatorList.length; i++){
-//       if(i === this.currentIndex -1){
-//         indicatorList[i].setAttribute("class", "fas fa-circle")
-//       }
-//       else{
-//         indicatorList[i].setAttribute("class", "far fa-circle")
-//       }
-//     }
-//   }
-//
-//   this.getIndicatorList = function(pos){
-//     var indicatorList = document.createElement('li');
-//     indicatorList.style.width = '40px';
-//     indicatorList.style.height = '40px';
-//
-//     if(pos === this.currentIndex -1){
-//       indicatorList.setAttribute("class", "fas fa-circle")
-//     }
-//     else{
-//       indicatorList.setAttribute("class", "far fa-circle")
-//     }
-//     return indicatorList
-//   }
-//
-//   this.createSideButtons = function(iconClass, orientation){
-//     var slideIcon = document.createElement('i')
-//     slideIcon.setAttribute('class', iconClass);
-//     slideIcon.style.fontSize = '20px';
-//     slideIcon.style.color = '#fcfcfc';
-//
-//     var sideBtn = document.createElement('div');
-//
-//     sideBtn.style.position = 'absolute';
-//     sideBtn.style.lineHeight = '40px';
-//     sideBtn.style.width = '40px'
-//     sideBtn.style.textAlign = 'center'
-//     sideBtn.style.top = '44%';
-//
-//     sideBtn.style.backgroundColor = 'red'
-//     sideBtn.appendChild(slideIcon)
-//
-//     if(orientation === 'left'){
-//       sideBtn.style.left = 0
-//       sideBtn.onclick = this.leftBtnListener
-//
-//     }else{
-//       sideBtn.style.right = 0
-//       sideBtn.onclick = this.rightBtnListener
-//     }
-//
-//     return sideBtn
-//   }
-//
-//   this.leftBtnListener= (function(){
-//
-//       var currentPosition = parseInt(this.wrapper.style.left);
-//
-//       this.currentIndex --;
-//       if(this.currentIndex < 1){
-//           updatePosition = (-this.sliderImages.length + 1) * parseInt(IMAGEWIDTH)
-//
-//           var sliderAnim = setInterval(function(){
-//             if(currentPosition > updatePosition){
-//               currentPosition --
-//               this.wrapper.style.left = currentPosition + 'px'
-//             }else{
-//               clearInterval(sliderAnim)
-//             }
-//           }, 5)
-//           this.currentIndex = sliderImages.length
-//
-//       }
-//       else{
-//         var updatePosition = ((-this.currentIndex+1) * parseInt(IMAGEWIDTH))
-//         var sliderAnim = setInterval(function(){
-//           if(currentPosition !== updatePosition){
-//             currentPosition ++
-//             this.wrapper.style.left = currentPosition + 'px'
-//           }else{
-//             clearInterval(sliderAnim)
-//           }
-//           this.currentIndex = currentPosition/parseInt(IMAGEWIDTH);
-//         }, 5)
-//
-//       }
-//       // index update
-//       this.updateIndex();
-//
-//       // this.wrapper.style.left = (-this.currentIndex * parseInt(IMAGEWIDTH)) + 'px'
-//
-//   }).bind(this)
-//
-//   this.rightBtnListener =(function(){
-//       var currentPosition = parseInt(this.wrapper.style.left);
-//       var updatePosition = (-this.currentIndex * parseInt(IMAGEWIDTH))
-//
-//
-//       if(this.currentIndex >= sliderImages.length){
-//           updatePosition = 0
-//
-//           this.currentIndex = 1
-//           var sliderAnim = setInterval(function(){
-//             if(currentPosition !== updatePosition){
-//               currentPosition ++
-//               this.wrapper.style.left = currentPosition + 'px'
-//             }else{
-//               clearInterval(sliderAnim)
-//             }
-//           }, 5)
-//       }else{
-//         this.currentIndex++;
-//         var sliderAnim = setInterval(function(){
-//           if(currentPosition !== updatePosition){
-//             currentPosition --
-//             this.wrapper.style.left = currentPosition + 'px'
-//
-//           }else{
-//             this.currentIndex = currentPosition/parseInt(IMAGEWIDTH);
-//
-//
-//             clearInterval(sliderAnim)
-//           }
-//         }, 5)
-//       }
-//
-//
-//       // index update
-//       this.updateIndex();
-//
-//   }).bind(this)
-//
-// }
-
-
-
-// Slider.prototype.createSideBtn = function(){
-//   // defigning the left and right buttons
-//   this.rightBtn = this.createSideButtons('fas fa-arrow-right', 'right')
-//   this.leftBtn = this.createSideButtons('fas fa-arrow-left', 'left')
-//
-//   this.carousel.appendChild(this.rightBtn)
-//   this.carousel.appendChild(this.leftBtn)
-// }
-//
-// Slider.prototype.setAttributes = function(){
-//   // wrapper
-//   this.wrapper.style.position = 'relative';
-//   this.wrapper.style.width = sliderImages.length * parseInt(IMAGEWIDTH) + 'px';
-//   this.wrapper.style.left = 0;
-//
-//   // container
-//   this.carousel.style.width = IMAGEWIDTH;
-//   this.carousel.style.height = parseInt(IMAGEHEIGHT) + 20 + 'px';
-//   this.carousel.style.position= 'relative';
-//   this.carousel.style.overflow= 'hidden';
-//   this.carousel.style.margin = 'auto';
-//
-//   // images
-
-//
-//   // Indicator
-//   this.indexIndicator = document.createElement('ul');
-//   this.indexIndicator.style.position='absolute';
-//   this.indexIndicator.style.bottom = '0px';
-//   this.indexIndicator.style.textAlign = 'center';
-//   this.indexIndicator.style.width = '100%';
-//   this.indexIndicator.style.display = 'inline-block';
-//
-//   for(var i = 0; i < this.sliderImages.length; i++){
-//     var indicatorList = this.getIndicatorList(i)
-//     this.indexIndicator.appendChild(indicatorList)
-//   }
-//
-//   this.indexIndicator.onclick = (function(e, i){
-//     this.currentIndex = Array.from(this.indexIndicator.children).indexOf(e.target)+1
-//     this.updateIndex()
-//     this.wrapper.style.left = (-this.currentIndex * parseInt(IMAGEWIDTH)) + 'px'
-//   }).bind(this)
-//   this.carousel.appendChild(this.indexIndicator)
-// }
-
-
-
-// Referencing the tags
-// var carousel = document.getElementsByClassName('carousel')[0];
-// var wrapper = document.getElementsByClassName('wrapper')[0];
-// var sliderImages = wrapper.children;
-//
-// var slider = new Slider(carousel, wrapper, sliderImages);
-// slider.createSideBtn();
-// slider.setAttributes();
