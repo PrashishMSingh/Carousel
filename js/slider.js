@@ -2,7 +2,6 @@ const IMAGEWIDTH = '700';
 const IMAGEHEIGHT = '430';
 const CHANGESPEED = 5;
 
-
 function Carousel(WIDTH, HEIGHT, carouselElement){
   this.carousel = carouselElement
   this.init = function(){
@@ -183,7 +182,6 @@ function SideButton(parentElement){
     }
   }
 
-
   this.getElement = function(){
     return this.sideBtnElement
   }
@@ -199,133 +197,153 @@ function SideButton(parentElement){
   }
 }
 
-// Referencing the tags
-var carouselElement = document.getElementsByClassName('carousel')[0];
-var wrapperElement = document.getElementsByClassName('wrapper')[0];
+function EventController(){
 
-var sliderImages = wrapperElement.children;
+}
+
+function SliderController(carouselElement){
+  this.carouselElement = carouselElement;
+  this.wrapperElement = this.carouselElement.getElementsByClassName('wrapper')[0];
+  this.sliderImages = this.wrapperElement.children;
+
   for(var i = 0; i<this.sliderImages.length; i++){
     this.sliderImages[i].style.float = 'left';
   }
 
-var carousel = new Carousel(IMAGEWIDTH, IMAGEHEIGHT, carouselElement).init()
-var wrapper = new Wrapper(wrapperElement, sliderImages).init()
-var indicator = new Indicator(carousel.getElement(), sliderImages.length).init()
+  this.carousel = new Carousel(IMAGEWIDTH, IMAGEHEIGHT, this.carouselElement).init()
+  this.wrapper = new Wrapper(this.wrapperElement, this.sliderImages).init()
+  this.indicator = new Indicator(this.carousel.getElement(), this.sliderImages.length).init()
 
-var leftSideBtn = new SideButton(carousel.getElement()).init()
-var rightSideBtn = new SideButton(carousel.getElement()).init()
+  this.leftSideBtn = new SideButton(this.carousel.getElement()).init()
+  this.rightSideBtn = new SideButton(this.carousel.getElement()).init()
 
-leftSideBtn.setIconPos('left')
-rightSideBtn.setIconPos('right')
-indicator.initializeIndicators();
+  this.leftSideBtn.setIconPos('left')
+  this.rightSideBtn.setIconPos('right')
+  this.indicator.initializeIndicators();
 
-function disableBtn(){
-  leftSideBtn.getElement().disable
-  rightSideBtn.getElement().disable
-}
 
-indicator.getElement().onclick = function(e){
-  var wrapperPosition = wrapper.getLeftPosition()
-  var newIndex = Array.from(indicator.getElement().children).indexOf(e.target);
-  var destinationPosition = -(newIndex * IMAGEWIDTH)
-  indicator.setCurrentIndex(newIndex);
 
-  var anim = setInterval(function(){
-      if(wrapperPosition != destinationPosition){
-        leftSideBtn.disableBtn()
-        rightSideBtn.disableBtn()
-        if(wrapperPosition < destinationPosition){
-            wrapperPosition = wrapperPosition + CHANGESPEED
+  // Indicator Event Listener
+   this.indicatorEvent = function(e){
+    var wrapperPosition = this.wrapper.getLeftPosition()
+
+    var newIndex = Array.from(this.indicator.getElement().children).indexOf(e.target);
+    var destinationPosition = -(newIndex * IMAGEWIDTH)
+
+    this.indicator.setCurrentIndex(newIndex);
+    var anim = setInterval((function(){
+        if(wrapperPosition != destinationPosition){
+          this.leftSideBtn.disableBtn()
+          this.rightSideBtn.disableBtn()
+          if(wrapperPosition < destinationPosition){
+              wrapperPosition = wrapperPosition + CHANGESPEED
+            }
+          else{
+            wrapperPosition = wrapperPosition - CHANGESPEED
           }
-        else{
-          wrapperPosition = wrapperPosition - CHANGESPEED
+          this.wrapper.setLeftPosition(wrapperPosition)
+        }else{
+          this.leftSideBtn.enableBtn()
+          this.rightSideBtn.enableBtn()
+          clearInterval(anim)
         }
-        wrapper.setLeftPosition(wrapperPosition)
-      }else{
-        leftSideBtn.enableBtn()
-        rightSideBtn.enableBtn()
-        clearInterval(anim)
-      }
-  }, CHANGESPEED)
-}
+    }).bind(this), CHANGESPEED)
 
-// Left button listener
-leftSideBtn.getElement().onclick = function(){
-  indicator.decrementIndex()
-  leftSideBtn.disableBtn()
-  rightSideBtn.disableBtn()
 
-  var currentIndex = indicator.getCurrentIndex();
-  var currentPosition = wrapper.getLeftPosition();
+  }
+
+  // // Left button listener
+  this.leftBtnEvent = function(){
+  this.indicator.decrementIndex()
+  this.leftSideBtn.disableBtn()
+  this.rightSideBtn.disableBtn()
+
+  var currentIndex = this.indicator.getCurrentIndex();
+  var currentPosition = this.wrapper.getLeftPosition();
   var updatePosition = -(currentIndex * IMAGEWIDTH)
 
   if(currentIndex < 0){
-      updatePosition = wrapper.getRightPosition()
-      indicator.setCurrentIndex(sliderImages.length-1)
+      updatePosition = this.wrapper.getRightPosition()
+      this.indicator.setCurrentIndex(this.sliderImages.length-1)
 
-      var sliderAnim = setInterval(function(){
+      var sliderAnim = setInterval((function(){
         if(currentPosition !== updatePosition){
           currentPosition = currentPosition - CHANGESPEED
 
-          wrapper.setLeftPosition(currentPosition)
+          this.wrapper.setLeftPosition(currentPosition)
         }else{
-          leftSideBtn.enableBtn()
-          rightSideBtn.enableBtn()
+          this.leftSideBtn.enableBtn()
+          this.rightSideBtn.enableBtn()
           clearInterval(sliderAnim)
         }
-      }, 5)
-  }else{
-    var sliderAnim = setInterval(function(){
-      if(currentPosition !== updatePosition){
-        currentPosition = currentPosition + CHANGESPEED
-        wrapper.setLeftPosition(currentPosition)
-
-      }else{
-        indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH)
-        leftSideBtn.enableBtn()
-        rightSideBtn.enableBtn()
-        clearInterval(sliderAnim)
-      }
-    }, 5)
-  }
-}
-
-// Right Index
-rightSideBtn.getElement().onclick = function(){
-  indicator.incrementIndex()
-  leftSideBtn.disableBtn()
-  rightSideBtn.disableBtn()
-
-  var currentPosition = wrapper.getLeftPosition();
-  var updatePosition = -(indicator.getCurrentIndex() * IMAGEWIDTH)
-
-  if(indicator.getCurrentIndex() >= sliderImages.length){
-      updatePosition = 0
-      indicator.setCurrentIndex(0);
-
-      var sliderAnim = setInterval(function(){
+      }).bind(this), 5)
+    }else{
+      var sliderAnim = setInterval((function(){
         if(currentPosition !== updatePosition){
           currentPosition = currentPosition + CHANGESPEED
-          wrapper.setLeftPosition(currentPosition)
+          this.wrapper.setLeftPosition(currentPosition)
+
         }else{
+          this.indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH)
           leftSideBtn.enableBtn()
           rightSideBtn.enableBtn()
           clearInterval(sliderAnim)
         }
-      }, 5)
+      }).bind(this), 5)
+    }
   }
 
-  else{
-    var sliderAnim = setInterval(function(){
-      if(currentPosition !== updatePosition){
-        currentPosition = currentPosition - CHANGESPEED
-        wrapper.setLeftPosition(currentPosition )
-      }else{
-        indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH);
-        leftSideBtn.enableBtn()
-        rightSideBtn.enableBtn()
-        clearInterval(sliderAnim)
+  // Right Index
+  this.rightBtnEvent= function(){
+      this.indicator.incrementIndex()
+      this.leftSideBtn.disableBtn()
+      this.rightSideBtn.disableBtn()
+
+      var currentPosition = this.wrapper.getLeftPosition();
+      var updatePosition = -(this.indicator.getCurrentIndex() * IMAGEWIDTH)
+
+      if(this.indicator.getCurrentIndex() >= this.sliderImages.length){
+          updatePosition = 0
+          this.indicator.setCurrentIndex(0);
+
+          var sliderAnim = setInterval((function(){
+            if(currentPosition !== updatePosition){
+              currentPosition = currentPosition + CHANGESPEED
+              this.wrapper.setLeftPosition(currentPosition)
+            }else{
+              this.leftSideBtn.enableBtn()
+              this.rightSideBtn.enableBtn()
+              clearInterval(sliderAnim)
+            }
+          }).bind(this), 5)
       }
-    }, 5)
-  }
+
+      else{
+        var sliderAnim = setInterval((function(){
+          if(currentPosition !== updatePosition){
+            currentPosition = currentPosition - CHANGESPEED
+            this.wrapper.setLeftPosition(currentPosition )
+          }else{
+            this.indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH);
+            this.leftSideBtn.enableBtn()
+            this.rightSideBtn.enableBtn()
+            clearInterval(sliderAnim)
+          }
+        }).bind(this), 5)
+      }
+    }
+
+
+
+  this.indicator.getElement().onclick = (function(e){
+    return this.indicatorEvent(e)}
+  ).bind(this)
+  this.leftSideBtn.getElement().onclick = (function(){ return this.leftBtnEvent()}).bind(this)
+  this.rightSideBtn.getElement().onclick = (function(){return this.rightBtnEvent()}).bind(this)
+}
+
+// Referencing the tags
+var carouselElementList = document.getElementsByClassName('carousel');
+for(var item = 0; item <carouselElementList.length; item++){
+  var sliderController = new SliderController(carouselElementList[item])
 }
