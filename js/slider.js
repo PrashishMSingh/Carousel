@@ -1,13 +1,15 @@
-const IMAGEWIDTH = '700';
-const IMAGEHEIGHT = '430';
-const CHANGESPEED = 5;
+const EM_VALUE = '16';
+const IMAGE_WIDTH = '800';
+const IMAGE_HEIGHT = '430';
+const CHANGE_SPEED = 5;
+const WAIT_MILLI = 1000;
 
 function Carousel(WIDTH, HEIGHT, carouselElement){
   this.carousel = carouselElement
   this.init = function(){
     // container
-    this.carousel.style.width = WIDTH + 'px';
-    this.carousel.style.height = parseInt(HEIGHT) + 20 + 'px';
+    this.carousel.style.width = WIDTH / EM_VALUE + 'em';
+    this.carousel.style.height = IMAGE_HEIGHT / EM_VALUE + 'em';
     this.carousel.style.position= 'relative';
     this.carousel.style.overflow= 'hidden';
     this.carousel.style.margin = 'auto';
@@ -25,7 +27,7 @@ function Carousel(WIDTH, HEIGHT, carouselElement){
 
 function Wrapper(wrapperElement, sliderImages){
   this.wrapper = wrapperElement;
-  this.wrapperWidth = (sliderImages.length) * IMAGEWIDTH
+  this.wrapperWidth = (sliderImages.length) * IMAGE_WIDTH
 
   this.init = function(){
     // wrapper
@@ -33,7 +35,7 @@ function Wrapper(wrapperElement, sliderImages){
 
     this.leftPosition = 0;
     this.wrapper.background = 'red';
-    this.rightPosition = -(this.wrapperWidth - IMAGEWIDTH)
+    this.rightPosition = -(this.wrapperWidth - IMAGE_WIDTH)
     this.wrapper.style.width =  this.wrapperWidth + 'px';
     this.wrapper.style.left = this.leftPosition + 'px';
     return this;
@@ -197,10 +199,6 @@ function SideButton(parentElement){
   }
 }
 
-function EventController(){
-
-}
-
 function SliderController(carouselElement){
   this.carouselElement = carouselElement;
   this.wrapperElement = this.carouselElement.getElementsByClassName('wrapper')[0];
@@ -208,9 +206,11 @@ function SliderController(carouselElement){
 
   for(var i = 0; i<this.sliderImages.length; i++){
     this.sliderImages[i].style.float = 'left';
+    this.sliderImages[i].style.width = IMAGE_WIDTH / EM_VALUE + 'em';
+    this.sliderImages[i].style.height = IMAGE_HEIGHT/EM_VALUE + 'em';
   }
 
-  this.carousel = new Carousel(IMAGEWIDTH, IMAGEHEIGHT, this.carouselElement).init()
+  this.carousel = new Carousel(IMAGE_WIDTH, IMAGE_HEIGHT, this.carouselElement).init()
   this.wrapper = new Wrapper(this.wrapperElement, this.sliderImages).init()
   this.indicator = new Indicator(this.carousel.getElement(), this.sliderImages.length).init()
 
@@ -221,14 +221,12 @@ function SliderController(carouselElement){
   this.rightSideBtn.setIconPos('right')
   this.indicator.initializeIndicators();
 
-
-
   // Indicator Event Listener
    this.indicatorEvent = function(e){
     var wrapperPosition = this.wrapper.getLeftPosition()
 
     var newIndex = Array.from(this.indicator.getElement().children).indexOf(e.target);
-    var destinationPosition = -(newIndex * IMAGEWIDTH)
+    var destinationPosition = -(newIndex * IMAGE_WIDTH)
 
     this.indicator.setCurrentIndex(newIndex);
     var anim = setInterval((function(){
@@ -236,10 +234,10 @@ function SliderController(carouselElement){
           this.leftSideBtn.disableBtn()
           this.rightSideBtn.disableBtn()
           if(wrapperPosition < destinationPosition){
-              wrapperPosition = wrapperPosition + CHANGESPEED
+              wrapperPosition = wrapperPosition + CHANGE_SPEED
             }
           else{
-            wrapperPosition = wrapperPosition - CHANGESPEED
+            wrapperPosition = wrapperPosition - CHANGE_SPEED
           }
           this.wrapper.setLeftPosition(wrapperPosition)
         }else{
@@ -247,9 +245,7 @@ function SliderController(carouselElement){
           this.rightSideBtn.enableBtn()
           clearInterval(anim)
         }
-    }).bind(this), CHANGESPEED)
-
-
+    }).bind(this), CHANGE_SPEED)
   }
 
   // // Left button listener
@@ -260,7 +256,7 @@ function SliderController(carouselElement){
 
   var currentIndex = this.indicator.getCurrentIndex();
   var currentPosition = this.wrapper.getLeftPosition();
-  var updatePosition = -(currentIndex * IMAGEWIDTH)
+  var updatePosition = -(currentIndex * IMAGE_WIDTH)
 
   if(currentIndex < 0){
       updatePosition = this.wrapper.getRightPosition()
@@ -268,7 +264,7 @@ function SliderController(carouselElement){
 
       var sliderAnim = setInterval((function(){
         if(currentPosition !== updatePosition){
-          currentPosition = currentPosition - CHANGESPEED
+          currentPosition = currentPosition - CHANGE_SPEED
 
           this.wrapper.setLeftPosition(currentPosition)
         }else{
@@ -280,13 +276,13 @@ function SliderController(carouselElement){
     }else{
       var sliderAnim = setInterval((function(){
         if(currentPosition !== updatePosition){
-          currentPosition = currentPosition + CHANGESPEED
+          currentPosition = currentPosition + CHANGE_SPEED
           this.wrapper.setLeftPosition(currentPosition)
 
         }else{
-          this.indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH)
-          leftSideBtn.enableBtn()
-          rightSideBtn.enableBtn()
+          this.indicator.setCurrentIndex(-currentPosition/IMAGE_WIDTH)
+          this.leftSideBtn.enableBtn()
+          this.rightSideBtn.enableBtn()
           clearInterval(sliderAnim)
         }
       }).bind(this), 5)
@@ -300,7 +296,7 @@ function SliderController(carouselElement){
       this.rightSideBtn.disableBtn()
 
       var currentPosition = this.wrapper.getLeftPosition();
-      var updatePosition = -(this.indicator.getCurrentIndex() * IMAGEWIDTH)
+      var updatePosition = -(this.indicator.getCurrentIndex() * IMAGE_WIDTH)
 
       if(this.indicator.getCurrentIndex() >= this.sliderImages.length){
           updatePosition = 0
@@ -308,7 +304,7 @@ function SliderController(carouselElement){
 
           var sliderAnim = setInterval((function(){
             if(currentPosition !== updatePosition){
-              currentPosition = currentPosition + CHANGESPEED
+              currentPosition = currentPosition + CHANGE_SPEED
               this.wrapper.setLeftPosition(currentPosition)
             }else{
               this.leftSideBtn.enableBtn()
@@ -321,10 +317,10 @@ function SliderController(carouselElement){
       else{
         var sliderAnim = setInterval((function(){
           if(currentPosition !== updatePosition){
-            currentPosition = currentPosition - CHANGESPEED
+            currentPosition = currentPosition - CHANGE_SPEED
             this.wrapper.setLeftPosition(currentPosition )
           }else{
-            this.indicator.setCurrentIndex(-currentPosition/IMAGEWIDTH);
+            this.indicator.setCurrentIndex(-currentPosition/IMAGE_WIDTH);
             this.leftSideBtn.enableBtn()
             this.rightSideBtn.enableBtn()
             clearInterval(sliderAnim)
@@ -333,17 +329,32 @@ function SliderController(carouselElement){
       }
     }
 
-
-
   this.indicator.getElement().onclick = (function(e){
     return this.indicatorEvent(e)}
   ).bind(this)
-  this.leftSideBtn.getElement().onclick = (function(){ return this.leftBtnEvent()}).bind(this)
-  this.rightSideBtn.getElement().onclick = (function(){return this.rightBtnEvent()}).bind(this)
+
+  this.leftSideBtn.getElement().onclick = (function(){
+    this.leftSideBtn.disableBtn()
+    this.rightSideBtn.disableBtn()
+    setTimeout((function(){
+      this.leftSideBtn.enableBtn()
+      this.rightSideBtn.enableBtn()
+      return this.leftBtnEvent()}).bind(this), WAIT_MILLI)
+    }).bind(this)
+
+  this.rightSideBtn.getElement().onclick = (function(){
+    this.leftSideBtn.disableBtn()
+    this.rightSideBtn.disableBtn()
+    setTimeout((function(){
+      this.leftSideBtn.enableBtn()
+      this.rightSideBtn.enableBtn()
+      return this.rightBtnEvent()}).bind(this), WAIT_MILLI)
+    }).bind(this)
 }
 
 // Referencing the tags
 var carouselElementList = document.getElementsByClassName('carousel');
 for(var item = 0; item <carouselElementList.length; item++){
+  carouselElementList[item].style.float = 'left'
   var sliderController = new SliderController(carouselElementList[item])
 }
