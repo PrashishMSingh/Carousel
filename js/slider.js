@@ -199,7 +199,7 @@ function SideButton(parentElement){
   }
 }
 
-function SliderController(carouselElement){
+function SliderController(carouselElement, intervalDuration){
   this.carouselElement = carouselElement;
   this.wrapperElement = this.carouselElement.getElementsByClassName('wrapper')[0];
   this.sliderImages = this.wrapperElement.children;
@@ -329,26 +329,38 @@ function SliderController(carouselElement){
       }
     }
 
+  this.startTransition = function(TRANSITION){
+    console.log("transition")
+    setInterval((function(){
+      var currentPosition = this.wrapper.getLeftPosition()
+
+      this.indicator.incrementIndex()
+      if(this.indicator.getCurrentIndex() >= this.sliderImages.length){
+        this.indicator.setCurrentIndex(0)
+        this.wrapper.setLeftPosition(0)
+      }
+
+      var destination = -((this.indicator.getCurrentIndex()) * IMAGE_WIDTH)
+      if(currentPosition > destination){
+        while(currentPosition > destination){
+            currentPosition--
+            this.wrapper.setLeftPosition(currentPosition)
+        }
+      }
+
+    }).bind(this), TRANSITION)
+  }
+
   this.indicator.getElement().onclick = (function(e){
     return this.indicatorEvent(e)}
   ).bind(this)
 
   this.leftSideBtn.getElement().onclick = (function(){
-    this.leftSideBtn.disableBtn()
-    this.rightSideBtn.disableBtn()
-    setTimeout((function(){
-      this.leftSideBtn.enableBtn()
-      this.rightSideBtn.enableBtn()
-      return this.leftBtnEvent()}).bind(this), WAIT_MILLI)
+      return this.leftBtnEvent()
     }).bind(this)
 
   this.rightSideBtn.getElement().onclick = (function(){
-    this.leftSideBtn.disableBtn()
-    this.rightSideBtn.disableBtn()
-    setTimeout((function(){
-      this.leftSideBtn.enableBtn()
-      this.rightSideBtn.enableBtn()
-      return this.rightBtnEvent()}).bind(this), WAIT_MILLI)
+      return this.rightBtnEvent()
     }).bind(this)
 }
 
@@ -357,4 +369,5 @@ var carouselElementList = document.getElementsByClassName('carousel');
 for(var item = 0; item <carouselElementList.length; item++){
   carouselElementList[item].style.float = 'left'
   var sliderController = new SliderController(carouselElementList[item])
+  sliderController.startTransition((item+1) * 1000)
 }
