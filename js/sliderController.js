@@ -4,7 +4,7 @@ const SLIDER_IMAGE_WIDTH = '700';
 const SLIDER_IMAGE_HEIGHT = '430';
 
 const CHANGE_SPEED = 5;
-const WAIT_MILLI = 1000;
+const WAIT_MILLI = 3000;
 
 const TRANSITION_DURATION = 3000;
 
@@ -600,5 +600,5 @@ for(var i = 0; i< carouselSecondSlide.length; i++){
   sliderController.setSliderType('horizontal')
   sliderController.setDefaultIndicator();
   sliderController.setActionListeners();
-  sliderController.startTransition(TRANSITION_DURATION)
+  sliderController.startTransition(Math.floor(TRANSITION_DURATION / i + 1))
 }
